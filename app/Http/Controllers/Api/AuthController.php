@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\ResetPasswordRequest;
 use App\Service\Interfaces\IAuthService;
 
 class AuthController extends Controller
@@ -35,5 +36,16 @@ class AuthController extends Controller
             'message' => 'Login success',
             'data' => $login
         ], 200);
+    }
+
+    public function resetPassword(ResetPasswordRequest $reset)
+    {
+        $dataReset = $reset->validated();
+        $reset = $this->_authService->resetPassword($dataReset);
+
+        return response()->json([
+            'message' => 'Reset password success',
+            'data' => $reset
+        ], 201);
     }
 }
