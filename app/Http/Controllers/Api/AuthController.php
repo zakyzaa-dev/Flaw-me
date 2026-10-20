@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Service\Interfaces\IAuthService;
 
@@ -23,5 +24,16 @@ class AuthController extends Controller
             'Message' => 'Register successful',
             'data' => $register,
         ],201);
+    }
+
+    public function login(LoginRequest $login)
+    {
+        $dataLogin = $login->all();
+        $login = $this->_authService->login($dataLogin);
+
+        return response()->json([
+            'message' => 'Login success',
+            'data' => $login
+        ], 200);
     }
 }
