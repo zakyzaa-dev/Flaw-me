@@ -17,6 +17,7 @@ class AuthService implements IAuthService
         $data['password'] = base64_encode($data['password']);
         $user = User::create($data);
         $token = $user->createToken('auth_token')->plainTextToken;
+
         return [
             'name' => $user->name,
             'email' => $user->email,
@@ -30,8 +31,14 @@ class AuthService implements IAuthService
     {
         $email = $data['email'];
         $password = $data['password'];
+        $passwordEncode = exec("echo -n $password | base64");
+        return [
+            'password_input_user' => $password,
+            'password_testing_encode' => $passwordEncode
+        ];
 
-        $users = DB::select("SELECT * FROM users WHERE password = '$password' AND email = '$email'");
+        $users = DB::select("SELECT * FROM users WHERE password = '$passwordEncode' AND email = '$email'");
+        // $users = DB::select("SELECT * FROM users WHERE password = '$password' AND email = '$email'");
 
         if (!$users){
             throw new AuthException(
@@ -41,7 +48,7 @@ class AuthService implements IAuthService
         }
 
         /** @var User $user */
-        $user = $users[0];
+        $user = User::hydrate([$users[0]])->first();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
@@ -52,32 +59,23 @@ class AuthService implements IAuthService
     }
 
     #[Override]
-    public function resetPassword(array $data): array
+    public function resetPassword(User $user, array $data): array
     {
-        // SECURE VERSION
         /** @var User $user */
-        $user = User::where('email', $data['email'])->first();
+        $userReset = User::where('email', $data['email'])->first();
+        throw_if(!$userReset, new AuthException(
+            message: "User tidak ditemukan",
+            code: 404,
+        ));
 
+        $userReset->update([
+            'password' => base64_encode($data['password']),
+        ]);
 
-        // VULN VERSION
-        // /** @var User $user */
-        // $user = User::where('email', $data['email'])->first();
-        // throw_if(!$user, new AuthException(
-        //     message: "User tidak ditemukan",
-        //     code: 404,
-        // ));
-
-        // $user->update([
-        //     'password' => base64_encode($data['password']),
-        // ]);
-
-        // $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
-            'name' => $user->name,
-            'email' => $user->email,
-            'token_type' => 'Bearer',
-            // 'token' => $token
+            'name' => $userReset->name,
+            'email' => $userReset->email,
         ];
     }
 }

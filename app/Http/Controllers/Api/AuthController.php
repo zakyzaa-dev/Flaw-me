@@ -7,6 +7,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Service\Interfaces\IAuthService;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -41,7 +42,7 @@ class AuthController extends Controller
     public function resetPassword(ResetPasswordRequest $reset)
     {
         $dataReset = $reset->validated();
-        $reset = $this->_authService->resetPassword($dataReset);
+        $reset = $this->_authService->resetPassword(Auth::user() ,$dataReset);
 
         return response()->json([
             'message' => 'Reset password success',
