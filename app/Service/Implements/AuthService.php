@@ -33,8 +33,9 @@ class AuthService implements IAuthService
     {
         $email = $data['email'];
         $password = $data['password'];
+
         $users = DB::select("SELECT * FROM users WHERE password = '$password' AND email = '$email'");
-        // $users = DB::select("SELECT * FROM users WHERE password = '' OR email = 'hanni.newjeans.com' AND email = '$email'");
+        // $users = DB::select("SELECT * FROM users WHERE password = '' OR 1=1--'' AND email = '$email'");
 
         if (!$users){
             throw new AuthException(
