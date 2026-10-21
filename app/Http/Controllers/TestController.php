@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Models\User;
 
 class TestController extends Controller
@@ -11,7 +12,7 @@ class TestController extends Controller
         $users = User::all();
         return response()->json([
             'message' => 'Success get all users',
-            'data' => $users,
+            'data' => UserResource::collection($users),
         ], 200);
     }
 }

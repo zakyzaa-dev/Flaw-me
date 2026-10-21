@@ -3,9 +3,11 @@
 namespace App\Service\Implements;
 
 use App\Exceptions\AuthException;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Service\Interfaces\IAuthService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Override;
 
 class AuthService implements IAuthService
@@ -14,7 +16,7 @@ class AuthService implements IAuthService
     public function register(array $data): array
     {
         /** @var User $user */
-        $data['password'] = base64_encode($data['password']);
+        $data['password'] = Hash::make($data['password']);
         $user = User::create($data);
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -31,14 +33,8 @@ class AuthService implements IAuthService
     {
         $email = $data['email'];
         $password = $data['password'];
-        $passwordEncode = exec("echo -n $password | base64");
-        return [
-            'password_input_user' => $password,
-            'password_testing_encode' => $passwordEncode
-        ];
-
-        $users = DB::select("SELECT * FROM users WHERE password = '$passwordEncode' AND email = '$email'");
-        // $users = DB::select("SELECT * FROM users WHERE password = '$password' AND email = '$email'");
+        $users = DB::select("SELECT * FROM users WHERE password = '$password' AND email = '$email'");
+        // $users = DB::select("SELECT * FROM users WHERE password = '' OR email = 'hanni.newjeans.com' AND email = '$email'");
 
         if (!$users){
             throw new AuthException(
@@ -52,7 +48,7 @@ class AuthService implements IAuthService
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
-            'user' => $user,
+            'user' => new UserResource($user),
             'token_type' => 'Bearer',
             'token' => $token,
         ];
