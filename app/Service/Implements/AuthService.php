@@ -7,7 +7,6 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Service\Interfaces\IAuthService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Override;
 
 class AuthService implements IAuthService
@@ -15,14 +14,12 @@ class AuthService implements IAuthService
     #[Override]
     public function register(array $data): array
     {
-        /** @var User $user */
-        $data['password'] = Hash::make($data['password']);
+        // /** @var User $user */
         $user = User::create($data);
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
-            'name' => $user->name,
-            'email' => $user->email,
+            'user' => new UserResource($user),
             'token_type' => 'Bearer',
             'token' => $token,
         ];
@@ -46,6 +43,7 @@ class AuthService implements IAuthService
 
         /** @var User $user */
         $user = User::hydrate([$users[0]])->first();
+        $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
@@ -66,7 +64,7 @@ class AuthService implements IAuthService
         ));
 
         $userReset->update([
-            'password' => base64_encode($data['password']),
+            'password' => $data['password'],
         ]);
 
 

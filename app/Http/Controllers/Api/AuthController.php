@@ -30,7 +30,7 @@ class AuthController extends Controller
 
     public function login(LoginRequest $login)
     {
-        $dataLogin = $login->all();
+        $dataLogin = $login->validated();
         $login = $this->_authService->login($dataLogin);
 
         return response()->json([
